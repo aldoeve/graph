@@ -72,6 +72,8 @@ void findLeafs(std::list<int>& leafs, Graph game)
 
 bool levelGraphConstruction(int* level, Graph game, int source, int sink)
 {
+    for(uint i = 0; i < game->size(); ++i) 
+        level[i] = -1;
     level[source] = 0;
     std::queue<int> todo;
     todo.push(source);
@@ -90,14 +92,20 @@ bool levelGraphConstruction(int* level, Graph game, int source, int sink)
     return level[sink] > -1;
 }
 
-int pushFlow(int source, int sink, int flow, int* seen, Graph game, int* level)
+int pushFlow(int source, int sink, int flow, Graph game, int* level)
 {
     if(source == sink) return flow;
     for(auto i = (*game)[source].begin(); i != (*game)[source].end(); ++i){
         if(level[i->destination] == level[source] + 1 && i->flow < i->weight){
-            
+            int currentFlow = std::min(flow, i->weight - i->flow);
+            int recurseFlow = pushFlow(i->destination, sink, currentFlow, game, level);
+            if(recurseFlow > 0){
+                i->flow += recurseFlow;
+                return recurseFlow;
+            }
         }
     }
+    return 0;
 }
 
 int maxflow(Graph game, int source, int sink)
@@ -105,14 +113,10 @@ int maxflow(Graph game, int source, int sink)
     if(source == sink) return -1;
     int answer = 0;
     int level[game->size()];
-    for(uint i = 0; i < game->size(); ++i) 
-        level[i] = -1;
     
     while(levelGraphConstruction(level, game, source, sink)){
-        int* edgesVisited = new int[game->size() + 1]{0};
-        for(int flow = pushFlow(source, sink, INT32_MAX, edgesVisited, game, level); flow != 0; flow = pushFlow(source, sink, flow, edgesVisited, game, level))
+        for(int flow = pushFlow(source, sink, INT32_MAX, game, level); flow != 0; flow = pushFlow(source, sink, flow, game, level))
             answer += flow;
-        delete [] edgesVisited;
     }
 
     return answer;

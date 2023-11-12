@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <vector>
 #include <list>
+#include <queue>
+#include <stack>
+#include <set>
 
 struct Edge{
     int destination, weight;
@@ -42,11 +45,92 @@ Graph constructGraph()
     return game;
 }
 
+void printGraph(Graph game)
+{
+    for(uint i = 0; i < (*game).size(); ++i){
+        for(auto j = (*game)[i].begin(); j != (*game)[i].end(); ++j){
+            std::cout << i;
+            std::cout << *j;
+        }
+    }
+}
+
+void printLevel(int* level, std::size_t size)
+{
+    for(std::size_t i = 0; i < size; ++i){
+        std::cout << i << "->" << level[i] << std::endl;
+    }
+}
+
+void findLeafs(std::list<int>& leafs, Graph game)
+{
+    for(uint i = 0; i < game->size(); ++i){
+        if((*game)[i].size() == 1 && (*game)[i].front().state == false)
+            leafs.push_back((*game)[i].front().index);
+    }
+}
+
+bool levelGraphConstruction(int* level, Graph game, int source, int sink)
+{
+    level[source] = 0;
+    std::queue<int> todo;
+    todo.push(source);
+
+    while(!todo.empty()){
+        int current = todo.front();
+        todo.pop();
+        for(auto i = (*game)[current].begin(); i != (*game)[current].end(); ++i){
+            if(level[i->destination] < 0 && i->flow < i->weight){
+                todo.push(i->destination);
+                level[i->destination] = level[current]+1;
+            }
+        }
+    }
+
+    return level[sink] > -1;
+}
+
+int pushFlow(int source, int sink, int flow, int* seen, Graph game, int* level)
+{
+    if(source == sink) return flow;
+    for(auto i = (*game)[source].begin(); i != (*game)[source].end(); ++i){
+        if(level[i->destination] == level[source] + 1 && i->flow < i->weight){
+            
+        }
+    }
+}
+
+int maxflow(Graph game, int source, int sink)
+{
+    if(source == sink) return -1;
+    int answer = 0;
+    int level[game->size()];
+    for(uint i = 0; i < game->size(); ++i) 
+        level[i] = -1;
+    
+    while(levelGraphConstruction(level, game, source, sink)){
+        int* edgesVisited = new int[game->size() + 1]{0};
+        for(int flow = pushFlow(source, sink, INT32_MAX, edgesVisited, game, level); flow != 0; flow = pushFlow(source, sink, flow, edgesVisited, game, level))
+            answer += flow;
+        delete [] edgesVisited;
+    }
+
+    return answer;
+}
+
 int shield()
 {
     Graph game = constructGraph();
+    int solution = 0;
+    std::list<int> leafs;
+    findLeafs(leafs, game);
+    if(!leafs.empty())
+        solution  = leafs.front();
+    else
+        solution = maxflow(game, 0, 3);
+
     delete game;
-    return INT32_MIN;
+    return solution;
 }
 
 int cut()
@@ -60,4 +144,5 @@ int main(int argc, char* argv[])
     if(argc != 2){std::cout << "ERROR: missing input\n"; return 0;}
     int modifiedEdge = strcmp(argv[1], "short\n") ? shield() : cut();
     std::cout << modifiedEdge << std::endl;
+    return 0;
 }

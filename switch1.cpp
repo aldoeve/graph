@@ -95,6 +95,7 @@ bool levelGraphConstruction(std::vector<int>& level, Graph* graph, const int sou
             }
         }
     }
+    printLevel(level);
     return seen.find(sink) != seen.end();
 }
 

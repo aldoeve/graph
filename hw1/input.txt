@@ -1,0 +1,127 @@
+======First just testing graphs with weights of 1 to see that all spanning trees are found=======
+/ 0
+/ 4
+0 1 1 1 
+1 0 1 1
+1 1 0 1
+1 1 1 0
+/ 3  
+0 1 1
+1 0 1
+1 1 0
+/ 1
+0
+/ 2
+0 1
+1 0
+/ 3
+0 1 1
+1 0 1
+1 1 0
+/ 5
+0 1 1 1 1
+1 0 1 1 1
+1 1 0 1 1
+1 1 1 0 1
+1 1 1 1 0
+/ 6
+0 1 1 1 1 1
+1 0 1 1 1 1
+1 1 0 1 1 1
+1 1 1 0 1 1
+1 1 1 1 0 1
+1 1 1 1 1 0
+/ 3
+0 1 0
+1 0 1
+0 1 0
+/ 5
+0 1 1 1 0
+1 0 1 0 1
+1 1 0 1 1
+1 0 1 0 1
+0 1 1 1 0
+/ 4
+0 1 0 0
+1 0 1 1
+0 1 0 1
+0 1 1 0
+/ 5
+0 1 1 0 0
+1 0 0 0 0
+1 0 0 1 1
+0 0 1 0 1
+0 0 1 1 0
+/ 4
+0 1 1 0
+1 0 1 1
+1 1 0 0
+0 1 0 0
+======Testing to see if the algorithm works with self-loops=====
+/ 3
+1 1 1
+1 1 1
+1 1 1
+/ 4
+1 1 1 1
+1 1 1 1
+1 1 1 1
+1 1 1 1
+========Testing that all spanning, all minimum, and all max spanning trees are found========
+/ 6
+0 0 0 0 0 3
+0 0 0 10 0 4
+0 0 0 8 0 5
+0 10 8 0 1 0
+0 0 0 1 0 0
+3 4 5 0 0 0
+/ 4
+0 1 3 0
+1 0 5 7
+3 5 0 0
+0 7 0 0
+/ 5
+0 5 2 0 0
+5 0 0 0 0
+2 0 0 1 3
+0 0 1 0 5
+0 0 3 5 0
+/ 4
+0 5 0 0
+5 0 2 3
+0 2 0 12
+0 3 12 0
+/ 4
+0 100 20 30
+100 0 0 0
+20 0 0 0
+30 0 0 0
+========testing if the algorithm can find the minimum spaning trees in the situation 2 or more are the same
+/ 4
+0 1 5 0
+1 0 5 7
+5 5 0 0
+0 7 0 0
+/ 3
+0 5 5
+5 0 6
+5 6 0
+/ 6
+0 5 4 7 0 6
+5 0 0 8 0 0
+4 0 0 0 0 0
+7 0 0 0 8 0
+0 8 0 8 0 8
+6 0 0 0 8 0
+========testing if the algorithm can handle large graphs
+using complete graphs and calculating their spanig trees by
+using the formula n^(n-2) to verify at higher amounts of edges=======
+/ 8
+0 1 1 1 1 1 1 1
+1 0 1 1 1 1 1 1
+1 1 0 1 1 1 1 1
+1 1 1 0 1 1 1 1
+1 1 1 1 0 1 1 1
+1 1 1 1 1 0 1 1
+1 1 1 1 1 1 0 1
+1 1 1 1 1 1 1 0 

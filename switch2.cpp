@@ -9,14 +9,14 @@
 
 struct Edge{
     int destination, weight;
-    const bool state;
+    bool state;
     int index, flow = 0;
     Edge(int d, int w, bool s, int i): destination(d), weight(w), state(s), index(i){;}
 };
 
 std::ostream& operator<<(std::ostream& os, const Edge& edge)
 {
-    return os << edge.destination << edge.weight << std::endl;
+    return os << ',' <<edge.destination << '=' << edge.weight << std::endl;
 }
 
 using Graph = std::vector<std::list<Edge>>*;
@@ -35,6 +35,7 @@ Graph constructGraph()
         bool state = i == 0 ? true : false;
         for(int j = 0; j < numOfState; ++j){
             std::cin >> source >> destination >> weight;
+            if(state) weight = INT32_MAX;
             Edge temp(destination, weight, state, j);
             Edge temp2(source, weight, state, j);
             (*game)[source].push_back(temp);
@@ -50,7 +51,8 @@ void printGraph(Graph game)
     for(uint i = 0; i < (*game).size(); ++i){
         for(auto j = (*game)[i].begin(); j != (*game)[i].end(); ++j){
             std::cout << i;
-            std::cout << *j;
+            std::cout << *j << '=';
+            std::cout << j->flow << std::endl;
         }
     }
 }
@@ -101,6 +103,12 @@ int pushFlow(int source, int sink, int flow, Graph game, int* level)
             int recurseFlow = pushFlow(i->destination, sink, currentFlow, game, level);
             if(recurseFlow > 0){
                 i->flow += recurseFlow;
+                for(auto j = (*game)[i->destination].begin(); j != (*game)[i->destination].end(); ++j){
+                    if(j->destination == source){
+                        j->flow -= recurseFlow;
+                        return recurseFlow;
+                    }
+                }
                 return recurseFlow;
             }
         }
@@ -108,9 +116,10 @@ int pushFlow(int source, int sink, int flow, Graph game, int* level)
     return 0;
 }
 
-int maxflow(Graph game, int source, int sink)
+std::list<int> maxflow(Graph game, int source, int sink)
 {
-    if(source == sink) return -1;
+    std::list<int> cutset;
+    if(source == sink) return cutset;
     int answer = 0;
     int level[game->size()];
     
@@ -119,29 +128,57 @@ int maxflow(Graph game, int source, int sink)
             answer += flow;
     }
 
-    return answer;
+    for(uint i = 0; i < (*game).size(); ++i){
+        for(auto j = (*game)[i].begin(); j != (*game)[i].end(); ++j){
+            if(j->weight - j->flow == 0 && j->state == false)
+                cutset.push_back(j->index);
+        }
+    } 
+    return cutset;
 }
 
 int shield()
 {
-    Graph game = constructGraph();
+    Graph original = constructGraph();
+    std::vector<std::list<Edge>> temp = *original;
+    Graph game = &temp;
     int solution = 0;
     std::list<int> leafs;
     findLeafs(leafs, game);
     if(!leafs.empty())
         solution  = leafs.front();
-    else
-        solution = maxflow(game, 0, 3);
-
-    delete game;
+    else{
+        std::vector<std::list<int>> cutsets;
+        int size = (int)(game->size());
+        bool memo[size][size] = {};
+        for(int i = 0; i < size; ++i){
+            for(int j = 0; j < size; ++j){
+                if(memo[i][j] == 0 or memo[i][j] == 0){
+                    memo[i][j] = 1; memo[i][j] = 1;
+                    cutsets.push_back(maxflow(game, i, j));
+                    temp = *original;
+                }
+            }
+        }
+        int smallest = INT32_MAX;
+        int index = 0;
+        for(int i = 0; i < (int)cutsets.size(); ++i){
+            if(cutsets[i].size() > 0 && (int)cutsets[i].size() < smallest){
+                smallest = (int)cutsets[i].size();
+                index = i;
+            }
+        }
+        if(smallest < INT32_MAX)
+            solution = cutsets[index].front();
+    }
+    delete original;
     return solution;
 }
 
 int cut()
 {
-    return INT32_MIN;
+    return shield();
 }
-
 
 int main(int argc, char* argv[])
 {

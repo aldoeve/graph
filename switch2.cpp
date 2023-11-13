@@ -160,6 +160,7 @@ int shield()
                 }
             }
         }
+        if(cutsets.size() == 0) return 0;
         int smallest = INT32_MAX;
         int index = 0;
         for(int i = 0; i < (int)cutsets.size(); ++i){

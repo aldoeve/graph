@@ -148,29 +148,23 @@ int shield()
     if(!leafs.empty())
         solution  = leafs.front();
     else{
-        std::vector<std::list<int>> cutsets;
+        std::list<int> cutset;
+        int smallestSeen = INT32_MAX;
         int size = (int)(game->size());
         bool memo[size][size] = {};
         for(int i = 0; i < size; ++i){
             for(int j = 0; j < size; ++j){
                 if(memo[i][j] == 0 or memo[i][j] == 0){
                     memo[i][j] = 1; memo[i][j] = 1;
-                    cutsets.push_back(maxflow(game, i, j));
-                    temp = *original;
+                    std::list<int> check = maxflow(game, i, j);
+                    if((int)(check.size()) < smallestSeen && check.size() != 0)
+                        cutset = check;
                 }
+                temp = *original;
             }
         }
-        if(cutsets.size() == 0) return 0;
-        int smallest = INT32_MAX;
-        int index = 0;
-        for(int i = 0; i < (int)cutsets.size(); ++i){
-            if(cutsets[i].size() > 0 && (int)cutsets[i].size() < smallest){
-                smallest = (int)cutsets[i].size();
-                index = i;
-            }
-        }
-        if(smallest < INT32_MAX)
-            solution = cutsets[index].front();
+        if(smallestSeen < INT32_MAX)
+            solution = cutset.front();
     }
     delete original;
     return solution;

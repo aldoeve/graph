@@ -35,6 +35,7 @@ Graph constructGraph()
         bool state = i == 0 ? true : false;
         for(int j = 0; j < numOfState; ++j){
             std::cin >> source >> destination >> weight;
+            --source; --destination;
             if(state) weight = INT32_MAX;
             Edge temp(destination, weight, state, j);
             Edge temp2(source, weight, state, j);

@@ -6,6 +6,7 @@
 #include <queue>
 #include <stack>
 #include <set>
+#include <chrono>
 
 struct Edge{
     int destination, weight;
@@ -178,8 +179,13 @@ int cut()
 
 int main(int argc, char* argv[])
 {
+    auto start = std::chrono::high_resolution_clock::now();
     if(argc != 2){std::cout << "ERROR: missing input\n"; return 0;}
     int modifiedEdge = strcmp(argv[1], "short\n") ? shield() : cut();
     std::cout << modifiedEdge << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end - start;
+    std::cout << duration.count() << std::endl;
     return 0;
 }
+//0.00053966325

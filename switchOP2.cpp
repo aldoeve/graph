@@ -36,7 +36,7 @@ Graph constructGraph()
         for(int j = 0; j < numOfState; ++j){
             std::cin >> source >> destination >> weight;
             --source; --destination;
-            if(!i) weight = INT32_MAX;
+            if(!i) weight = 150;
             Edge temp(destination, weight, !i, j);
             Edge temp2(source, weight, !i, j);
             (*game)[source].push_back(temp);

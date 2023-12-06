@@ -3,11 +3,13 @@
 #include <vector>
 #include <set>
 #include <queue>
+#include <algorithm>
 
 struct Edge{
     int destination, weight, reverse;
     bool state;
-    int index, flow = 0;
+    int index;
+    mutable int flow = 0;
     Edge(int d, int w, int r, bool s, int i): 
         destination(d), weight(w), reverse(r), state(s), index(i){;}
     bool operator< (const Edge& other)const{
@@ -17,7 +19,7 @@ struct Edge{
 
 using Graph = std::vector<std::set<Edge>>*;
 
-Graph constructGraph(unsigned long int& map)
+Graph constructGraph(unsigned long int& map, int& edges)
 {
     int source, destination, weight;
     int numOfState, size;
@@ -30,6 +32,7 @@ Graph constructGraph(unsigned long int& map)
 
     for(int i = 0; i < 2; ++i){
         std::cin >> numOfState;
+        edges = numOfState;
         for(int j = 0; j < numOfState; ++j){
             std::cin >> source >> destination >> weight;
             --source; --destination;
@@ -60,7 +63,7 @@ int leafSelection(unsigned long int leafs, Graph game)
         leafs = leafs >> 1;
     }
     return (*game)[--count].begin()->index;
-}/*
+}
 
 bool levelGraphConstruction(int* level ,Graph game, const int source, const int sink)
 {
@@ -95,7 +98,11 @@ int pushFlow(const int source, const int sink, int flow, Graph game, int* level)
             recurseFlow = pushFlow(i->destination, sink, currentFlow, game, level); 
             if(recurseFlow > 0){
                 i->flow += recurseFlow;
-                
+                std::set<Edge>::iterator temp = (*game)[i->destination].find(Edge{i->reverse, 0, 0, 0, 0});
+                std::set<Edge>::iterator end = (*game)[i->destination].end();
+                if(temp != end){
+                    (*temp).flow -= recurseFlow;
+                }
                 return recurseFlow;
             }
         }
@@ -103,10 +110,10 @@ int pushFlow(const int source, const int sink, int flow, Graph game, int* level)
     return 0;
 }
 
-std::list<int> maxflow(Graph game, const int source, const int sink)
+void maxflow(Graph game, int data[2] , const int source, const int sink)
 {
-    std::list<int> cutset;
-    if(source == sink) return cutset;
+    data[0] = -1; data[1] = -1;
+    if(source == sink) return;
     int level[game->size()];
     
     while(levelGraphConstruction(level, game, source, sink)){
@@ -129,23 +136,29 @@ std::list<int> maxflow(Graph game, const int source, const int sink)
     } 
     return cutset;
 }
-*/
+
 int sheild()
 {
     unsigned long map = 0;
-    Graph game = constructGraph(map);
+    int edges = 0;
+    Graph game = constructGraph(map, edges);
     if(map > 0) return leafSelection(map, game);
+    std::vector<int> counts(edges, 0);
 
-
-    return 0;
+    return std::distance(std::begin(counts), std::max_element(std::begin(counts), std::end(counts)));
 }
 
 int cut()
 {
     unsigned long int map = 0;
-    Graph game = constructGraph(map);
+    int edges = 0;
+    Graph game = constructGraph(map, edges);
     if(map > 0) return leafSelection(map, game);
-    return 0;
+    std::vector<int> counts(edges, 0);
+
+    int index = (int) std::distance(std::begin(counts), std::max_element(std::begin(counts), std::end(counts)));
+    counts[index] = 0;
+    return (int) std::distance(std::begin(counts), std::max_element(std::begin(counts), std::end(counts)));
 }
 
 int main(int argc, char* argv[])

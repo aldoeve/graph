@@ -1,16 +1,21 @@
 #include <iostream>
 #include <string.h>
 #include <vector>
-#include <list>
+#include <set>
+#include <queue>
 
 struct Edge{
     int destination, weight, reverse;
     bool state;
     int index, flow = 0;
     Edge(int d, int w, int r, bool s, int i): 
-        destination(d), weight(w), reverse(r), state(s), index(i){;} 
+        destination(d), weight(w), reverse(r), state(s), index(i){;}
+    bool operator< (const Edge& other)const{
+        return this->destination < other.destination;
+    } 
 };
-using Graph = std::vector<std::list<Edge>>*;
+
+using Graph = std::vector<std::set<Edge>>*;
 
 Graph constructGraph(unsigned long int& map)
 {
@@ -20,7 +25,7 @@ Graph constructGraph(unsigned long int& map)
     unsigned long int seen = 0;
 
     std::cin >> size;
-    Graph game = new std::vector<std::list<Edge>>;
+    Graph game = new std::vector<std::set<Edge>>;
     game->resize(size);
 
     for(int i = 0; i < 2; ++i){
@@ -38,8 +43,9 @@ Graph constructGraph(unsigned long int& map)
             if(!i) weight = 111;
             Edge temp(destination, weight, source, !i, j);
             Edge temp2(source, weight, destination, !i, j);
-            (*game)[source].push_back(temp);
-            (*game)[destination].push_back(temp2);
+
+            (*game)[source].emplace(temp);
+            (*game)[destination].emplace(temp2);
         }
     }
     map = map xor seen;
@@ -53,9 +59,77 @@ int leafSelection(unsigned long int leafs, Graph game)
         ++count;
         leafs = leafs >> 1;
     }
-    return (*game)[--count].front().index;
+    return (*game)[--count].begin()->index;
+}/*
+
+bool levelGraphConstruction(int* level ,Graph game, const int source, const int sink)
+{
+    for(unsigned int i = 0; i < game->size(); ++i)
+        level[i] = -1;
+    level[source] = 0;
+    std::queue<int> todo;
+    todo.push(source);
+    int current;
+
+    while(!todo.empty()){
+        current = todo.front();
+        todo.pop();
+        for(auto i = (*game)[current].begin(); i != (*game)[current].end(); ++i){
+            if(level[i->destination] < 0 && i->flow < i->weight){
+                todo.push(i->destination);
+                level[i->destination] = level[current]+1;
+            }
+        }
+    }
+
+    return level[sink] > -1;
 }
 
+int pushFlow(const int source, const int sink, int flow, Graph game, int* level)
+{
+    int currentFlow, recurseFlow;
+    if(source == sink) return flow;
+    for(auto i = (*game)[source].begin(); i != (*game)[source].end(); ++i){
+        if(level[i->destination] == level[source] + 1 && i->flow < i->weight){
+            currentFlow = std::min(flow, i->weight - i->flow);
+            recurseFlow = pushFlow(i->destination, sink, currentFlow, game, level); 
+            if(recurseFlow > 0){
+                i->flow += recurseFlow;
+                
+                return recurseFlow;
+            }
+        }
+    }
+    return 0;
+}
+
+std::list<int> maxflow(Graph game, const int source, const int sink)
+{
+    std::list<int> cutset;
+    if(source == sink) return cutset;
+    int level[game->size()];
+    
+    while(levelGraphConstruction(level, game, source, sink)){
+        for(int flow = pushFlow(source, sink, INT32_MAX, game, level); flow != 0; flow = pushFlow(source, sink, flow, game, level))
+            ;
+    }
+
+    int smallestWeight = INT32_MAX;
+    for(uint i = 0; i < (*game).size(); ++i){
+        for(auto j = (*game)[i].begin(); j != (*game)[i].end(); ++j){
+            if(j->weight - j->flow == 0 && j->state == false){
+                if(smallestWeight > j->weight){
+                    cutset.push_front(j->index);
+                    smallestWeight = j->weight;
+                }
+                else
+                    cutset.push_back(j->index);
+            }
+        }
+    } 
+    return cutset;
+}
+*/
 int sheild()
 {
     unsigned long map = 0;

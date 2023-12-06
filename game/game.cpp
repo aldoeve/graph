@@ -110,10 +110,9 @@ int pushFlow(const int source, const int sink, int flow, Graph game, int* level)
     return 0;
 }
 
-void maxflow(Graph game, int data[2] , const int source, const int sink)
+int maxflow(Graph game, const int source, const int sink)
 {
-    data[0] = -1; data[1] = -1;
-    if(source == sink) return;
+    if(source == sink) return 0;
     int level[game->size()];
     
     while(levelGraphConstruction(level, game, source, sink)){
@@ -122,19 +121,26 @@ void maxflow(Graph game, int data[2] , const int source, const int sink)
     }
 
     int smallestWeight = INT32_MAX;
+    int index = 0;
     for(uint i = 0; i < (*game).size(); ++i){
         for(auto j = (*game)[i].begin(); j != (*game)[i].end(); ++j){
             if(j->weight - j->flow == 0 && j->state == false){
                 if(smallestWeight > j->weight){
-                    cutset.push_front(j->index);
+                    index = j->index;
                     smallestWeight = j->weight;
                 }
-                else
-                    cutset.push_back(j->index);
             }
         }
     } 
-    return cutset;
+    return index;
+}
+
+void clean(Graph game){
+    for(unsigned int i = 0; i < game->size(); ++i){
+        for(auto j = (*game)[i].begin(); j != (*game)[i].end(); ++j){
+            j->flow = 0;
+        }
+    }
 }
 
 int sheild()
@@ -144,8 +150,16 @@ int sheild()
     Graph game = constructGraph(map, edges);
     if(map > 0) return leafSelection(map, game);
     std::vector<int> counts(edges, 0);
+    int location = 0;
+    for(unsigned int i = 0; i < game->size(); ++i){
+        for(auto j = (*game)[i].begin(); j != (*game)[i].end(); ++j){
+            location = maxflow(game, i, j->destination);
+            counts[location] += 1;
+            clean(game);
+        }
+    }
 
-    return std::distance(std::begin(counts), std::max_element(std::begin(counts), std::end(counts)));
+    return (int)std::distance(std::begin(counts), std::max_element(std::begin(counts), std::end(counts)));
 }
 
 int cut()
@@ -155,6 +169,14 @@ int cut()
     Graph game = constructGraph(map, edges);
     if(map > 0) return leafSelection(map, game);
     std::vector<int> counts(edges, 0);
+    int location = 0;
+    for(unsigned int i = 0; i < game->size(); ++i){
+        for(auto j = (*game)[i].begin(); j != (*game)[i].end(); ++j){
+            location = maxflow(game, i, j->destination);
+            counts[location] += 1;
+            clean(game);
+        }
+    }
 
     int index = (int) std::distance(std::begin(counts), std::max_element(std::begin(counts), std::end(counts)));
     counts[index] = 0;
